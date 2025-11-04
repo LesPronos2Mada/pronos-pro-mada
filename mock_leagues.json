@@ -1,0 +1,58 @@
+{
+  "response": [
+    {
+      "league": {
+        "id": 61,
+        "name": "Ligue 1"
+      },
+      "country": {
+        "name": "France"
+      }
+    },
+    {
+      "league": {
+        "id": 39,
+        "name": "Premier League"
+      },
+      "country": {
+        "name": "England"
+      }
+    },
+    {
+      "league": {
+        "id": 140,
+        "name": "LaLiga"
+      },
+      "country": {
+        "name": "Spain"
+      }
+    },
+    {
+      "league": {
+        "id": 135,
+        "name": "Serie A"
+      },
+      "country": {
+        "name": "Italy"
+      }
+    },
+    {
+      "league": {
+        "id": 78,
+        "name": "Bundesliga"
+      },
+      "country": {
+        "name": "Germany"
+      }
+    },
+    {
+      "league": {
+        "id": 2,
+        "name": "UEFA Champions League"
+      },
+      "country": {
+        "name": "Europe"
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "response": [
+    {
+      "fixture": {
+        "id": 100140,
+        "date": "2025-11-04T20:00:00Z",
+        "status": {
+          "short": "NS"
+        }
+      },
+      "league": {
+        "id": 140,
+        "name": "Mock League"
+      },
+      "teams": {
+        "home": {
+          "id": 1140,
+          "name": "Home 140"
+        },
+        "away": {
+          "id": 2140,
+          "name": "Away 140"
+        }
+      },
+      "goals": {
+        "home": null,
+        "away": null
+      }
+    }
+  ]
+}

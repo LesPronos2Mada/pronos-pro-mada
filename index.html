@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pronos PRO</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000">
+  <style>
+    body { font-family: -apple-system, system-ui, Segoe UI, Roboto, sans-serif; margin:0; background:#0b0c10; color:#f5f5f5; }
+    header { padding:16px; font-weight:700; font-size:18px; position:sticky; top:0; background:#0b0c10; border-bottom:1px solid #222; }
+    .leagues { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:16px; }
+    .card { background:#111318; border:1px solid #1f2229; border-radius:12px; padding:14px; }
+    .card button { width:100%; background:#1a2130; color:#fff; border:1px solid #2a3448; border-radius:8px; padding:10px; font-weight:700; }
+    .list { padding:16px; }
+    .match { display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #1f2229; }
+    .teams { font-weight:600; }
+    .probs { font-size:12px; opacity:.9; }
+    .back { margin:16px; }
+    .pill { background:#1f2838; padding:4px 8px; border-radius:999px; font-size:12px; margin-left:6px;}
+    .row { display:flex; gap:8px; align-items:center; }
+    .hidden { display:none; }
+    footer { padding:12px; font-size:12px; color:#bbb; text-align:center; }
+  </style>
+</head>
+<body>
+  <header>Pronos PRO — Mobile</header>
+  <main id="app">
+    <section id="home">
+      <div class="leagues">
+        <div class="card"><button data-lid="61">Ligue 1</button></div>
+        <div class="card"><button data-lid="39">Premier League</button></div>
+        <div class="card"><button data-lid="140">LaLiga</button></div>
+        <div class="card"><button data-lid="135">Serie A</button></div>
+        <div class="card"><button data-lid="78">Bundesliga</button></div>
+        <div class="card"><button data-lid="2">Ligue des Champions</button></div>
+      </div>
+    </section>
+    <section id="list" class="hidden">
+      <div class="back"><button id="backBtn">← Compétitions</button></div>
+      <div class="list" id="matches"></div>
+    </section>
+  </main>
+  <footer>Auto-refresh API — zéro saisie</footer>
+  <script>
+    const API = '/api';
+    const KEY = 'change_me'; // remplace par ta APP_API_KEY définie dans config.js
+    const headers = { 'X-API-KEY': KEY };
+
+    async function fetchJSON(url){
+      const res = await fetch(url, { headers });
+      if (!res.ok) { const t = await res.text(); throw new Error(t); }
+      return res.json();
+    }
+
+    const home = document.getElementById('home');
+    const list = document.getElementById('list');
+    const matchesEl = document.getElementById('matches');
+    document.querySelectorAll('[data-lid]').forEach(btn=>{
+      btn.addEventListener('click', ()=> loadLeague(btn.dataset.lid));
+    });
+    document.getElementById('backBtn').onclick = ()=>{
+      list.classList.add('hidden'); home.classList.remove('hidden');
+      matchesEl.innerHTML='';
+    };
+
+    async function loadLeague(lid){
+      home.classList.add('hidden'); list.classList.remove('hidden');
+      matchesEl.innerHTML = '<div>Chargement…</div>';
+      try{
+        const today = new Date().toISOString().slice(0,10);
+        const fixtures = await fetchJSON(`${API}/fixtures?league=${lid}&date=${today}`);
+        matchesEl.innerHTML = '';
+        if (!fixtures.length){ matchesEl.innerHTML = '<div>Aucun match aujourd’hui.</div>'; return; }
+        for (const f of fixtures){
+          const probs = await fetchJSON(`${API}/probabilities?league=${lid}&home=${f.home.id}&away=${f.away.id}`)
+            .catch(_=>({ pH:0.0, pD:0.0, pA:0.0, over25:0.0, expScoreDiff:0 }));
+          const row = document.createElement('div');
+          row.className = 'match';
+          row.innerHTML = `
+            <div>
+              <div class="teams">${f.home.name} <span class="pill">vs</span> ${f.away.name}</div>
+              <div class="probs">1: ${(probs.pH*100).toFixed(1)}% • N: ${(probs.pD*100).toFixed(1)}% • 2: ${(probs.pA*100).toFixed(1)}% • O2.5: ${(probs.over25*100).toFixed(1)}%</div>
+            </div>
+            <div class="row"><span class="pill">${new Date(f.date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>
+          `;
+          matchesEl.appendChild(row);
+        }
+      }catch(e){
+        matchesEl.innerHTML = '<div>Erreur API. Vérifie ta clé (index.html) et redémarre.</div>';
+      }
+    }
+
+    if ('serviceWorker' in navigator){ navigator.serviceWorker.register('/service-worker.js'); }
+  </script>
+</body>
+</html>
